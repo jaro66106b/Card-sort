@@ -14,9 +14,9 @@ function defaultState() {
   const c1 = createId('card')
   return {
     lanes: [
-      { id: todoId, title: 'To Do', cardIds: [c1] },
-      { id: doingId, title: 'Doing', cardIds: [] },
-      { id: doneId, title: 'Done', cardIds: [] },
+      { id: todoId, title: 'Column 1', cardIds: [c1] },
+      { id: doingId, title: 'Column 2', cardIds: [] },
+      { id: doneId, title: 'Column 3', cardIds: [] },
     ],
     cards: {
       [c1]: { id: c1, title: 'Welcome! Drag me to another lane.' },
@@ -28,7 +28,19 @@ export default function App() {
   const [state, setState] = useState(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY)
-      return raw ? JSON.parse(raw) : defaultState()
+      const loaded = raw ? JSON.parse(raw) : defaultState()
+      if (!loaded._migratedColumnTitles) {
+        const defaultOld = ['To Do', 'Doing', 'Done']
+        const matchesOldDefaults =
+          Array.isArray(loaded.lanes) &&
+          loaded.lanes.length === 3 &&
+          loaded.lanes.every((l, i) => l?.title === defaultOld[i])
+        if (matchesOldDefaults) {
+          loaded.lanes = loaded.lanes.map((l, i) => ({ ...l, title: `Column ${i + 1}` }))
+          loaded._migratedColumnTitles = true
+        }
+      }
+      return loaded
     } catch {
       return defaultState()
     }
@@ -39,6 +51,12 @@ export default function App() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
     } catch {}
   }, [state])
+
+  function resetBoard() {
+    if (!confirm('Reset board to defaults? This will clear local data.')) return
+    try { localStorage.removeItem(STORAGE_KEY) } catch {}
+    setState(defaultState())
+  }
 
   const cardsByLane = useMemo(() => {
     const map = {}
@@ -152,7 +170,10 @@ export default function App() {
     <div className="app">
       <header className="app-header">
         <h1>Card Sort</h1>
-        <button className="primary" onClick={addLane}>Add Lane</button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button onClick={resetBoard}>Reset Board</button>
+          <button className="primary" onClick={addLane}>Add Lane</button>
+        </div>
       </header>
       <Board
         lanes={state.lanes}

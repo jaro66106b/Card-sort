@@ -12,7 +12,22 @@
 
 * { box-sizing: border-box; }
 html, body, #root { height: 100%; }
-body { margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji"; background: var(--bg); color: var(--text); }
+body { margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji"; color: var(--text);
+  background-color: #26004d;
+  background-image:
+    radial-gradient(at 30% 5%, hsla(156, 86%, 50%, 1) 0, hsla(156, 86%, 50%, 0) 50%),
+    radial-gradient(at 18% 66%, hsla(324, 91%, 61%, 1) 0, hsla(324, 91%, 61%, 0) 50%),
+    radial-gradient(at 22% 92%, hsla(101, 90%, 56%, 1) 0, hsla(101, 90%, 56%, 0) 50%),
+    radial-gradient(at 78% 80%, hsla(220, 87%, 59%, 1) 0, hsla(220, 87%, 59%, 0) 50%),
+    radial-gradient(at 27% 74%, hsla(26, 95%, 57%, 1) 0, hsla(26, 95%, 57%, 0) 50%),
+    radial-gradient(at 65% 4%, hsla(323, 87%, 52%, 1) 0, hsla(323, 87%, 52%, 0) 50%),
+    radial-gradient(at 71% 85%, hsla(164, 85%, 64%, 1) 0, hsla(164, 85%, 64%, 0) 50%),
+    radial-gradient(at 22% 99%, hsla(186, 93%, 50%, 1) 0, hsla(186, 93%, 50%, 0) 50%),
+    radial-gradient(at 75% 13%, hsla(176, 86%, 50%, 1) 0, hsla(176, 86%, 50%, 0) 50%),
+    radial-gradient(at 82% 8%, hsla(332, 95%, 50%, 1) 0, hsla(332, 95%, 50%, 0) 50%),
+    radial-gradient(at 2% 88%, hsla(264, 89%, 64%, 1) 0, hsla(264, 89%, 64%, 0) 50%),
+    radial-gradient(at 97% 43%, hsla(247, 88%, 65%, 1) 0, hsla(247, 88%, 65%, 0) 50%);
+}
 
 button { background: transparent; color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; cursor: pointer; }
 button:hover { background: rgba(255,255,255,0.05); }
