@@ -135,6 +135,31 @@ export default function App() {
     })
   }
 
+  function saveResults() {
+    let text = 'Card Sort Results\n'
+    text += '='.repeat(40) + '\n\n'
+    for (const lane of state.lanes) {
+      text += `${lane.title}\n`
+      text += '-'.repeat(lane.title.length) + '\n'
+      const cards = lane.cardIds.map((id) => state.cards[id]).filter(Boolean)
+      if (cards.length === 0) {
+        text += '  (no cards)\n'
+      } else {
+        cards.forEach((card) => {
+          text += `  • ${card.title}\n`
+        })
+      }
+      text += '\n'
+    }
+    const blob = new Blob([text], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'card-sort-results.txt'
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   function moveCard(cardId, toLaneId, toIndex = null) {
     setState((s) => {
       let fromLaneId = null
@@ -186,6 +211,9 @@ export default function App() {
         onDeleteCard={deleteCard}
         onMoveCard={moveCard}
       />
+      <button className="save-results-btn" onClick={saveResults}>
+        Save Results
+      </button>
     </div>
   )
 }
