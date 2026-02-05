@@ -115,6 +115,24 @@ button.primary { border-color: var(--primary); color: white; background: color-m
     gap: 6px
 }
 
+.save-results-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    z-index: 100;
+}
+
+.save-results-btn:hover {
+    background: color-mix(in oklab, var(--primary) 80%, white);
+}
+
 @media (max-width: 640px) {
     .board {
         grid-auto-columns:86vw
