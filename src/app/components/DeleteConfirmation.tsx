@@ -5,35 +5,35 @@ interface DeleteConfirmationProps {
 
 export function DeleteConfirmation({ onConfirm, onCancel }: DeleteConfirmationProps) {
   return (
-    <div 
-      className="fixed inset-0 bg-black bg-opacity-20 flex items-center justify-center z-50"
-      onClick={onCancel}
-    >
+    <>
       <div 
-        className="bg-white rounded-lg p-6 max-w-md w-full mx-4"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <h2 className="text-xl font-semibold mb-4 text-gray-800">Delete Stack</h2>
-        
-        <p className="text-gray-600 mb-6">
-          Are you sure you want to delete this stack? This action cannot be undone and all cards in this stack will be removed.
-        </p>
-
-        <div className="flex gap-2 justify-end">
-          <button
-            onClick={onCancel}
-            className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={onConfirm}
-            className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
-          >
-            Delete Stack
-          </button>
+        className="fixed inset-0 bg-black opacity-20 z-40"
+        onClick={onCancel}
+      />
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-lg shadow-xl p-6 max-w-md w-full">
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">
+            Delete Stack?
+          </h3>
+          <p className="text-gray-600 mb-6">
+            This will permanently delete this stack and all cards in it. This action cannot be undone.
+          </p>
+          <div className="flex gap-3 justify-end">
+            <button
+              onClick={onCancel}
+              className="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors cursor-pointer border-none"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={onConfirm}
+              className="px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors cursor-pointer border-none"
+            >
+              Delete
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

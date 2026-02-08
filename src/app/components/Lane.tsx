@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useDrop } from 'react-dnd';
+import { useState, useRef, useEffect } from 'react';
+import { useDrop, useDrag } from 'react-dnd';
 import { Card } from './Card';
 import { DeleteConfirmation } from './DeleteConfirmation';
 import svgPaths from '../../imports/svg-211rcsmznl';
@@ -14,29 +14,46 @@ interface LaneProps {
   id: string;
   name: string;
   cards: CardData[];
+  index: number;
+  startEditing?: boolean;
   onAddCard: (laneId: string) => void;
   onEditCard: (cardId: string, newContent: string) => void;
   onDeleteCard: (cardId: string) => void;
   onMoveCard: (cardId: string, fromLaneId: string, toLaneId: string) => void;
   onRenameLane: (laneId: string, newName: string) => void;
   onDeleteLane: (laneId: string) => void;
+  onMoveLane: (dragIndex: number, hoverIndex: number) => void;
 }
 
 export function Lane({ 
   id, 
   name, 
-  cards, 
+  cards,
+  index,
+  startEditing,
   onAddCard, 
   onEditCard, 
   onDeleteCard, 
   onMoveCard,
   onRenameLane,
-  onDeleteLane
+  onDeleteLane,
+  onMoveLane
 }: LaneProps) {
   const [showMenu, setShowMenu] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
   const [editValue, setEditValue] = useState(name);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (startEditing) {
+      setIsEditingName(true);
+    }
+  }, [startEditing]);
+
+  useEffect(() => {
+    setEditValue(name);
+  }, [name]);
 
   const [{ isOver }, drop] = useDrop(() => ({
     accept: 'CARD',
@@ -48,7 +65,50 @@ export function Lane({
     collect: (monitor) => ({
       isOver: monitor.isOver(),
     }),
-  }));
+  }), [id, onMoveCard]);
+
+  const [{ isDragging }, drag, preview] = useDrag(() => ({
+    type: 'LANE',
+    item: () => {
+      return { id, index };
+    },
+    collect: (monitor) => ({
+      isDragging: monitor.isDragging(),
+    }),
+  }), [id, index]);
+
+  const [, dropLane] = useDrop(() => ({
+    accept: 'LANE',
+    hover: (item: { id: string; index: number }, monitor) => {
+      if (!ref.current) {
+        return;
+      }
+      const dragIndex = item.index;
+      const hoverIndex = index;
+
+      if (dragIndex === hoverIndex) {
+        return;
+      }
+
+      const hoverBoundingRect = ref.current?.getBoundingClientRect();
+      const hoverMiddleX = (hoverBoundingRect.right - hoverBoundingRect.left) / 2;
+      const clientOffset = monitor.getClientOffset();
+      const hoverClientX = clientOffset!.x - hoverBoundingRect.left;
+
+      if (dragIndex < hoverIndex && hoverClientX < hoverMiddleX) {
+        return;
+      }
+      if (dragIndex > hoverIndex && hoverClientX > hoverMiddleX) {
+        return;
+      }
+
+      onMoveLane(dragIndex, hoverIndex);
+      item.index = hoverIndex;
+    },
+  }), [index, onMoveLane]);
+
+  preview(drop(ref));
+  dropLane(ref);
 
   const handleRename = () => {
     if (editValue.trim() && editValue !== name) {
@@ -70,9 +130,12 @@ export function Lane({
 
   return (
     <div
-      ref={drop}
+      ref={ref}
       className="bg-[rgba(255,255,255,0.3)] content-stretch flex flex-col gap-[16px] items-start overflow-clip p-[24px] relative rounded-[8px] shrink-0 min-w-[368px]"
-      style={{ backgroundColor: isOver ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.3)' }}
+      style={{ 
+        backgroundColor: isOver ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.3)',
+        opacity: isDragging ? 0.5 : 1
+      }}
     >
       <div className="content-stretch flex items-center justify-between relative shrink-0 w-full">
         {isEditingName ? (
@@ -93,7 +156,10 @@ export function Lane({
             autoFocus
           />
         ) : (
-          <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold leading-[normal] not-italic relative shrink-0 text-[20px] text-white">
+          <p 
+            ref={drag}
+            className="font-['Inter:Semi_Bold',sans-serif] font-semibold leading-[normal] not-italic relative shrink-0 text-[20px] text-white cursor-move"
+          >
             {name}
           </p>
         )}

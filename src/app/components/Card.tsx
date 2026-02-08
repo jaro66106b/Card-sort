@@ -18,10 +18,11 @@ export function Card({ id, content, laneId, onEdit, onDelete }: CardProps) {
   const [{ isDragging }, drag] = useDrag(() => ({
     type: 'CARD',
     item: { id, laneId },
+    canDrag: !isEditing,
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
-  }));
+  }), [id, laneId, isEditing]);
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -46,24 +47,24 @@ export function Card({ id, content, laneId, onEdit, onDelete }: CardProps) {
   return (
     <div
       ref={drag}
-      className="bg-[#f6f6f6] content-stretch flex gap-[8px] items-start overflow-clip pl-[16px] pr-[8px] py-[8px] relative rounded-[8px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.15)] shrink-0 w-full cursor-move"
+      className="bg-[#f6f6f6] content-stretch flex gap-[8px] items-start overflow-clip pl-[16px] pr-[8px] py-[8px] relative rounded-[8px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.15)] shrink-0 w-[280px] cursor-move"
       style={{ opacity: isDragging ? 0.5 : 1 }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       {isEditing ? (
-        <input
-          type="text"
+        <textarea
           value={editValue}
           onChange={(e) => setEditValue(e.target.value)}
           onBlur={handleSave}
           onKeyDown={handleKeyDown}
-          className="flex flex-[1_0_0] font-['Inter:Bold',sans-serif] font-bold text-[#14455c] text-[18px] bg-transparent border-none outline-none"
+          className="flex flex-[1_0_0] font-['Inter:Bold',sans-serif] font-bold text-[#14455c] text-[18px] bg-transparent border-none outline-none resize-none"
           autoFocus
+          rows={3}
         />
       ) : (
         <div className="flex flex-[1_0_0] flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[0] min-h-px min-w-px not-italic relative self-stretch text-[#14455c] text-[18px]">
-          <p className="leading-[normal] whitespace-pre-wrap">{content}</p>
+          <p className="leading-[normal] whitespace-pre-wrap break-words overflow-wrap-anywhere">{content}</p>
         </div>
       )}
       <div

@@ -17,33 +17,22 @@ interface LaneData {
 
 export default function App() {
   const [lanes, setLanes] = useState<LaneData[]>([
-    { id: '1', name: 'Stack name' },
-    { id: '2', name: 'Stack name' },
-    { id: '3', name: 'Stack name' },
+    { id: '1', name: 'Stack 1' },
+    { id: '2', name: 'Stack 2' },
+    { id: '3', name: 'Stack 3' },
   ]);
 
+  const [newlyCreatedLaneId, setNewlyCreatedLaneId] = useState<string | null>(null);
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [titleValue, setTitleValue] = useState('Card Sort');
+
   const [cards, setCards] = useState<CardData[]>([
-    { id: 'c1', content: 'Card data', laneId: '1' },
-    { id: 'c2', content: 'Card data', laneId: '1' },
-    { id: 'c3', content: 'Card data', laneId: '1' },
-    { id: 'c4', content: 'Card data', laneId: '1' },
-    { id: 'c5', content: 'Card data', laneId: '1' },
-    { id: 'c6', content: 'Card data', laneId: '1' },
-    { id: 'c7', content: 'Card data', laneId: '1' },
-    { id: 'c8', content: 'Card data', laneId: '2' },
-    { id: 'c9', content: 'Card data', laneId: '2' },
-    { id: 'c10', content: 'Card data', laneId: '2' },
-    { id: 'c11', content: 'Card data', laneId: '2' },
-    { id: 'c12', content: 'Card data', laneId: '2' },
-    { id: 'c13', content: 'Card data', laneId: '2' },
-    { id: 'c14', content: 'Card data', laneId: '2' },
-    { id: 'c15', content: 'Card data', laneId: '2' },
-    { id: 'c16', content: 'Card data', laneId: '3' },
-    { id: 'c17', content: 'Card data', laneId: '3' },
-    { id: 'c18', content: 'Card data', laneId: '3' },
-    { id: 'c19', content: 'Card data', laneId: '3' },
-    { id: 'c20', content: 'Card data', laneId: '3' },
-    { id: 'c21', content: 'Card data', laneId: '3' },
+    { id: 'c1', content: 'Card data 1', laneId: '1' },
+    { id: 'c2', content: 'Card data 2', laneId: '1' },
+    { id: 'c3', content: 'Card data 3', laneId: '1' },
+    { id: 'c10', content: 'Card data 1', laneId: '2' },
+    { id: 'c11', content: 'Card data 2', laneId: '2' },
+    { id: 'c16', content: 'Card data 1', laneId: '3' },
   ]);
 
   const addLane = () => {
@@ -52,6 +41,8 @@ export default function App() {
       name: 'Stack name',
     };
     setLanes([...lanes, newLane]);
+    setNewlyCreatedLaneId(newLane.id);
+    setTimeout(() => setNewlyCreatedLaneId(null), 100);
   };
 
   const addCard = (laneId: string) => {
@@ -90,6 +81,16 @@ export default function App() {
     setCards(cards.filter(card => card.laneId !== laneId));
   };
 
+  const moveLane = (dragIndex: number, hoverIndex: number) => {
+    if (dragIndex < 0 || dragIndex >= lanes.length || hoverIndex < 0 || hoverIndex >= lanes.length) return;
+    if (dragIndex === hoverIndex) return;
+    
+    const newLanes = [...lanes];
+    const [draggedLane] = newLanes.splice(dragIndex, 1);
+    newLanes.splice(hoverIndex, 0, draggedLane);
+    setLanes(newLanes);
+  };
+
   const resetBoard = () => {
     setLanes([
       { id: '1', name: 'Stack name' },
@@ -122,7 +123,7 @@ export default function App() {
   };
 
   const exportAsTxt = () => {
-    let content = 'Card Sort Export\n\n';
+    let content = `${titleValue} Export\n\n`;
     lanes.forEach(lane => {
       content += `${lane.name}\n`;
       content += '='.repeat(lane.name.length) + '\n';
@@ -142,14 +143,36 @@ export default function App() {
     URL.revokeObjectURL(url);
   };
 
+  const handleTitleSave = () => {
+    if (titleValue.trim()) {
+      setIsEditingTitle(false);
+    } else {
+      setTitleValue('Card Sort');
+      setIsEditingTitle(false);
+    }
+  };
+
   const exportAsCsv = () => {
-    let content = 'Lane,Card Content\n';
-    lanes.forEach(lane => {
-      const laneCards = cards.filter(card => card.laneId === lane.id);
-      laneCards.forEach(card => {
-        content += `"${lane.name}","${card.content}"\n`;
-      });
-    });
+    // Create header row with lane names
+    const header = lanes.map(lane => `"${lane.name}"`).join(',');
+    
+    // Find max number of cards in any lane
+    const maxCards = Math.max(...lanes.map(lane => 
+      cards.filter(card => card.laneId === lane.id).length
+    ));
+    
+    // Build rows
+    const rows: string[] = [];
+    for (let i = 0; i < maxCards; i++) {
+      const row = lanes.map(lane => {
+        const laneCards = cards.filter(card => card.laneId === lane.id);
+        const card = laneCards[i];
+        return card ? `"${card.content}"` : '';
+      }).join(',');
+      rows.push(row);
+    }
+    
+    const content = header + '\n' + rows.join('\n') + '\n';
 
     const blob = new Blob([content], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
@@ -162,14 +185,36 @@ export default function App() {
 
   return (
     <DndProvider backend={HTML5Backend}>
-      <div className="size-full min-h-screen flex flex-col bg-gradient-to-br from-[#6366f1] via-[#a855f7] to-[#ec4899] overflow-auto">
+      <div className="size-full min-h-screen flex flex-col bg-gradient-to-br from-[#6366f1] via-[#a855f7] to-[#ec4899] bg-cover overflow-auto">
         {/* Header */}
         <div className="relative shrink-0 w-full">
           <div className="flex flex-row items-center size-full">
             <div className="content-stretch flex items-center justify-between px-[24px] py-[16px] relative w-full">
-              <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold leading-[normal] not-italic relative shrink-0 text-[32px] text-white">
-                Card Sort
-              </p>
+              {isEditingTitle ? (
+                <input
+                  type="text"
+                  value={titleValue}
+                  onChange={(e) => setTitleValue(e.target.value)}
+                  onBlur={handleTitleSave}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleTitleSave();
+                    } else if (e.key === 'Escape') {
+                      setTitleValue(titleValue);
+                      setIsEditingTitle(false);
+                    }
+                  }}
+                  className="font-['Inter:Semi_Bold',sans-serif] font-semibold text-[32px] text-white bg-transparent border-none outline-none border-b-2 border-white w-full"
+                  autoFocus
+                />
+              ) : (
+                <p 
+                  onClick={() => setIsEditingTitle(true)}
+                  className="font-['Inter:Semi_Bold',sans-serif] font-semibold leading-[normal] not-italic relative shrink-0 text-[32px] text-white cursor-pointer"
+                >
+                  {titleValue}
+                </p>
+              )}
               <div className="content-stretch flex gap-[8px] items-center justify-end relative shrink-0">
                 <button 
                   className="bg-[rgba(255,255,255,0.25)] content-stretch flex items-center justify-center px-[16px] py-[4px] relative rounded-[100px] shrink-0 cursor-pointer border border-solid border-white"
@@ -195,18 +240,21 @@ export default function App() {
         {/* Lanes */}
         <div className="flex-1 px-[24px] py-[16px] overflow-x-auto">
           <div className="flex gap-[16px] items-start min-h-full">
-            {lanes.map((lane) => (
+            {lanes.map((lane, index) => (
               <Lane
                 key={lane.id}
                 id={lane.id}
                 name={lane.name}
                 cards={cards.filter(card => card.laneId === lane.id)}
+                index={index}
+                startEditing={newlyCreatedLaneId === lane.id}
                 onAddCard={addCard}
                 onEditCard={editCard}
                 onDeleteCard={deleteCard}
                 onMoveCard={moveCard}
                 onRenameLane={renameLane}
                 onDeleteLane={deleteLane}
+                onMoveLane={moveLane}
               />
             ))}
             
