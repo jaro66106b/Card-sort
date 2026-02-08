@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { Lane } from './components/Lane';
@@ -34,6 +34,20 @@ export default function App() {
     { id: 'c11', content: 'Card data 2', laneId: '2' },
     { id: 'c16', content: 'Card data 1', laneId: '3' },
   ]);
+
+  // Set document title and meta description
+  useEffect(() => {
+    document.title = 'Simple Card Sort';
+    
+    // Update or create meta description
+    let metaDescription = document.querySelector('meta[name="description"]');
+    if (!metaDescription) {
+      metaDescription = document.createElement('meta');
+      metaDescription.setAttribute('name', 'description');
+      document.head.appendChild(metaDescription);
+    }
+    metaDescription.setAttribute('content', 'A simple card sort tool for fast research. Launch studies in minutes, collect results, and turn chaos into clean insights.');
+  }, []);
 
   const addLane = () => {
     const newLane: LaneData = {
